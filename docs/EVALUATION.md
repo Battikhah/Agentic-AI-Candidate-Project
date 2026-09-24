@@ -28,7 +28,7 @@ This evaluation checks answer structure, scope, citation fidelity, and stated un
 
 ## Citation gate follow-up
 
-An Agno post-hook now checks answer URLs against the evidence pack and URLs appearing in actual `web_search`/`web_fetch` results. A focused offline check covers pack, top-level and nested tool-result URLs, plus invented links. In a nonstreaming API run, the same price question generated an unsupported URL and the hook replaced the answer with a source-verification failure message (HTTP 200, 17.5 seconds). After removing the optional Healthy Way price anchor, the next run returned usable price bands with **no URL outside the pack** and no web call (HTTP 200, 15.0 seconds).
+An Agno post-hook now checks answer URLs against the evidence pack and URLs appearing in actual `web_search`/`web_fetch` or `parallel_search`/`parallel_extract` results. A focused offline check covers pack, top-level and nested tool-result URLs, the optional Parallel SDK tool names, plus invented links. In a nonstreaming API run, the same price question generated an unsupported URL and the hook replaced the answer with a source-verification failure message (HTTP 200, 17.5 seconds). After removing the optional Healthy Way price anchor, the next run returned usable price bands with **no URL outside the pack** and no web call (HTTP 200, 15.0 seconds).
 
 A live JLT rent question searched and fetched sources but produced an uncited-in-results SquareYards link; the gate correctly withheld the answer (HTTP 200, 38.8 seconds, four web calls). A narrower follow-up returned one Property Finder listing URL that appeared in its web results, with rent and restaurant suitability qualified (HTTP 200, 38.2 seconds, four web calls). The gate verifies URL provenance, not whether the source supports every claim.
 
@@ -36,6 +36,8 @@ This gate is verified for **nonstreaming** responses. [Agno's hook documentation
 
 ## Offline check and next evaluation
 
-An import check inside `agentos-api` confirmed that both city packs and all eight topic headings load into `INSTRUCTIONS`: `PASS: both city packs and all eight headings loaded`.
+An import check inside `agentos-api` confirmed that both city packs and all eight required advisory topics load into `INSTRUCTIONS` (the last three topics share one numbered instruction).
+
+On 24 September, Agno's interactive CLI answered a JLT-versus-Al-Reem question and used `web_search` and `web_fetch` for a current JLT rent example. The local nonstreaming REST endpoint also returned a complete eight-topic executive plan with 14 URLs, all present in the evidence pack. The hosted AgentOS UI remained inactive in this environment; the CLI is the verified chatbot interface.
 
 For the next round, compare the advisor with fresh official/menu pages and verify streaming behavior before claiming the same citation guarantee in the UI. Price bands and the opening sequence must remain hypotheses until recipe costs, lease quotes, delivery contracts, and customer tests are available.

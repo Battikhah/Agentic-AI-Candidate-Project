@@ -26,7 +26,7 @@ def check_citation_urls(run_output: RunOutput) -> None:
 
     allowed = EVIDENCE_URLS.copy()
     for call in run_output.tools or []:
-        if call.tool_name in {"web_search", "web_fetch"} and call.result:
+        if call.tool_name in {"web_search", "web_fetch", "parallel_search", "parallel_extract"} and call.result:
             allowed.update(URL_PATTERN.findall(str(call.result)))
 
     if set(URL_PATTERN.findall(run_output.content)) - allowed:

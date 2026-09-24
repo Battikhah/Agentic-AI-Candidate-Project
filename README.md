@@ -22,60 +22,30 @@ The [AgentOS Control Plane](https://os.agno.com?utm_source=github&utm_medium=tem
 
 <p align="center"><em>Everything runs on infrastructure you control, your data lives in your database.</em></p>
 
-## Get Started
+## Run the UAE Market Advisor
 
-Copy this prompt into your favorite coding agent. It sets up the platform and builds your first agent for you:
-
-```text
-Help me set up my agent platform and build my first agent.
-
-Clone https://github.com/agno-agi/agentos-docker into a folder called agent-platform, cd in, and run the setup-platform skill (in .agents/skills/).
-```
-
-Your coding agent checks Docker, sets up `.env`, boots the platform, verifies the MCP endpoint, connects to the AgentOS UI, then builds your first agent. Prefer to drive yourself? See [Manual Setup](#manual-setup).
-
-## Manual Setup
-
-### Step 1: Run locally
-
-> **Prerequisite:** [Docker](https://www.docker.com/get-started/) installed and running.
+From this repository's root, with [Docker](https://www.docker.com/get-started/) running:
 
 ```sh
-git clone https://github.com/agno-agi/agentos-docker agentos
-cd agentos
-
-# Configure credentials
 cp example.env .env
-# Open .env and set OPENAI_API_KEY
-
-# Run the platform on docker
+# Set OPENAI_API_KEY in .env; do not commit it.
 docker compose up -d --build
+docker exec -e AGNO_DEBUG=False -it agentos-api python -c 'import asyncio; from agents.market_advisor import market_advisor; asyncio.run(market_advisor.acli_app())'
 ```
 
-Confirm your AgentOS is running at [http://localhost:8000/docs](http://localhost:8000/docs).
+The last command opens Agno's interactive CLI chat; enter `exit` to leave. It was checked with both an evidence-pack question and a live web-search question. AgentOS also exposes the advisor at `POST /agents/market-advisor/runs`, documented at [http://localhost:8000/docs](http://localhost:8000/docs). The hosted [AgentOS UI](https://os.agno.com) is optional; its local connection was inactive in the verification environment, so use the CLI for a reproducible run.
 
-### Step 2: Connect the AgentOS UI
-
-1. Open [os.agno.com](https://os.agno.com?utm_source=github&utm_medium=template&utm_campaign=agentos-docker) and sign in.
-2. Click **Connect OS**, enter `http://localhost:8000` as the URL, name it **Local AgentOS**, and connect.
-
-### Step 3: Try the included market advisor
-
-The **market-advisor** agent is registered in [`app/main.py`](app/main.py) and described in [`app/config.yaml`](app/config.yaml). In AgentOS, open **Chat**, choose **UAE Market Advisor** from the agent selector, and try one of its suggested prompts:
+Try these executive questions:
 
 - Compare Dubai and Abu Dhabi launch areas, including audience, rent, and delivery tradeoffs.
 - Identify competitors in both cities and suggest positioning for meaty pizza and kebab.
 - Draft a launch plan covering menu, pricing, marketing, delivery, licensing, and staffing.
 
-The local API is documented at [http://localhost:8000/docs](http://localhost:8000/docs). AgentOS sends UI/API questions to the Python/Agno agent in [`agents/market_advisor.py`](agents/market_advisor.py). It reads the dated [Dubai](evidence/dubai.md) and [Abu Dhabi](evidence/abu_dhabi.md) evidence packs first, uses web search for missing or current-sensitive facts, then checks answer URLs against those sources before returning a nonstreaming response. AgentOS stores sessions in Postgres. The shared GPT-5.6 model and selective search limit tool calls; [the ten-question evaluation](docs/EVALUATION.md) records observed token usage and failures. Market evidence can become stale, web results can be misread, and the URL check does not prove a claim is supported. Verify current rents, prices, rules, and competitors locally; uncosted price guidance remains provisional.
+The Python/Agno agent is registered in [`app/main.py`](app/main.py) and described in [`app/config.yaml`](app/config.yaml). It reads the dated [Dubai](evidence/dubai.md) and [Abu Dhabi](evidence/abu_dhabi.md) evidence packs first, then can use Parallel web search for missing or current-sensitive facts. A post-hook checks whether each answer URL appeared in the pack or a web-tool result before a nonstreaming answer is returned. AgentOS stores sessions in Postgres. The agent uses the shared GPT-5.6 model; instructions favor the pack and a few targeted searches to control API use. [The ten-question evaluation](docs/EVALUATION.md) records actual token usage and failures. There is no enforced token or tool-call cap.
+
+Evidence can become stale, web results can be misread, and URL membership does not prove that a claim is supported. Verify current rents, prices, rules, and competitors locally; uncosted prices remain provisional. The URL gate is verified for nonstreaming answers, including the CLI; streamed UI chunks may arrive before the post-hook runs.
 
 **AI tool disclosure:** Codex assisted with the advisor code, evidence research, evaluation, and this documentation; GPT-6 Luna Medium subagents drafted and reviewed the documentation and demo scope. The deployed Agno advisor runs on GPT-5.6. The candidate set up the Agno Docker platform. Personal code contributions and which parts the candidate can explain must be confirmed before submission.
-
-### Step 4: Build another agent using natural language
-
-1. Click **Chat** under the **Agno** team and tell it what you're working on: "Help me build an agent for my product".
-2. Give it the docs URL for your product, or for a product you like — `docs.agno.com`, say.
-3. Click the **Refresh** button on the top right. You should now see your new agent in the **Agents** dropdown. Chat with it directly, or just ask Agno to run it for you.
 
 ## Make the platform yours
 

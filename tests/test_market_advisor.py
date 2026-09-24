@@ -30,6 +30,12 @@ class CitationUrlTest(unittest.TestCase):
         check_citation_urls(category)
         self.assertEqual(category.content, "[Category](https://example.com/category)")
 
+        for name in ("parallel_search", "parallel_extract"):
+            sdk_tool = SimpleNamespace(tool_name=name, result=tool.result)
+            sdk_live = RunOutput(content=f"[Source]({live_url})", tools=[sdk_tool])
+            check_citation_urls(sdk_live)
+            self.assertEqual(sdk_live.content, f"[Source]({live_url})")
+
         invented = RunOutput(content="[Source](https://example.invalid/invented)", tools=[tool])
         check_citation_urls(invented)
         self.assertNotIn("example.invalid", invented.content)
