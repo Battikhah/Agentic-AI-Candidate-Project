@@ -1,6 +1,13 @@
 manifest:
   # --- Agents ---
 
+  market-advisor:
+    description: "Advises on Dubai and Abu Dhabi expansion for a Jordanian pizza and kebab restaurant."
+    quick_prompts:
+      - "Compare two launch areas in Dubai and Abu Dhabi, including audience, rent, and delivery tradeoffs."
+      - "Who are our competitors in both cities, and how should we position meaty pizza and kebab?"
+      - "Draft a launch plan with menu, pricing, marketing, delivery, licensing, and staffing."
+
   platform-builder:
     description: "Creates agents, teams, workflows, and schedules using the AgentOS Studio."
     quick_prompts:
