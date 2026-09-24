@@ -59,7 +59,19 @@ Confirm your AgentOS is running at [http://localhost:8000/docs](http://localhost
 1. Open [os.agno.com](https://os.agno.com?utm_source=github&utm_medium=template&utm_campaign=agentos-docker) and sign in.
 2. Click **Connect OS**, enter `http://localhost:8000` as the URL, name it **Local AgentOS**, and connect.
 
-### Step 3: Build your first agent using natural language
+### Step 3: Try the included market advisor
+
+The **market-advisor** agent is registered in [`app/main.py`](app/main.py) and described in [`app/config.yaml`](app/config.yaml). In AgentOS, open **Chat**, choose **UAE Market Advisor** from the agent selector, and try one of its suggested prompts:
+
+- Compare Dubai and Abu Dhabi launch areas, including audience, rent, and delivery tradeoffs.
+- Identify competitors in both cities and suggest positioning for meaty pizza and kebab.
+- Draft a launch plan covering menu, pricing, marketing, delivery, licensing, and staffing.
+
+The local API is documented at [http://localhost:8000/docs](http://localhost:8000/docs). AgentOS sends UI/API questions to the Python/Agno agent in [`agents/market_advisor.py`](agents/market_advisor.py). It reads the dated [Dubai](evidence/dubai.md) and [Abu Dhabi](evidence/abu_dhabi.md) evidence packs first, uses web search for missing or current-sensitive facts, then checks answer URLs against those sources before returning a nonstreaming response. AgentOS stores sessions in Postgres. The shared GPT-5.6 model and selective search limit tool calls; [the ten-question evaluation](docs/EVALUATION.md) records observed token usage and failures. Market evidence can become stale, web results can be misread, and the URL check does not prove a claim is supported. Verify current rents, prices, rules, and competitors locally; uncosted price guidance remains provisional.
+
+**AI tool disclosure:** Codex assisted with the advisor code, evidence research, evaluation, and this documentation; GPT-6 Luna Medium subagents drafted and reviewed the documentation and demo scope. The deployed Agno advisor runs on GPT-5.6. The candidate set up the Agno Docker platform. Personal code contributions and which parts the candidate can explain must be confirmed before submission.
+
+### Step 4: Build another agent using natural language
 
 1. Click **Chat** under the **Agno** team and tell it what you're working on: "Help me build an agent for my product".
 2. Give it the docs URL for your product, or for a product you like — `docs.agno.com`, say.
