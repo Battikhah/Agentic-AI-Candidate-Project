@@ -1,8 +1,10 @@
 """Market expansion advisor for a Jordanian pizza and kebab restaurant."""
 
+import re
 from pathlib import Path
 
 from agno.agent import Agent
+from agno.run.agent import RunOutput
 
 from app.settings import default_model
 from app.tools import get_parallel_tools
@@ -13,6 +15,25 @@ MARKET_EVIDENCE = "\n\n".join(
     (EVIDENCE_DIR / filename).read_text(encoding="utf-8")
     for filename in ("dubai.md", "abu_dhabi.md")
 )
+URL_PATTERN = re.compile(r"https?://[^\s<>\])\"']+")
+EVIDENCE_URLS = set(URL_PATTERN.findall(MARKET_EVIDENCE))
+
+
+def check_citation_urls(run_output: RunOutput) -> None:
+    """Keep generated URLs from masquerading as sources absent from the evidence or web results."""
+    if not isinstance(run_output.content, str):
+        return
+
+    allowed = EVIDENCE_URLS.copy()
+    for call in run_output.tools or []:
+        if call.tool_name in {"web_search", "web_fetch"} and call.result:
+            allowed.update(URL_PATTERN.findall(str(call.result)))
+
+    if set(URL_PATTERN.findall(run_output.content)) - allowed:
+        run_output.content = (
+            "I could not verify every source link in this answer. "
+            "Please retry or ask me to search for current sources."
+        )
 
 INSTRUCTIONS = """\
 You advise executives of a Jordanian meaty-pizza and kebab-sandwich restaurant expanding into Dubai and Abu Dhabi.
@@ -48,6 +69,7 @@ market_advisor = Agent(
     model=default_model(),
     db=get_postgres_db(),
     tools=get_parallel_tools(),
+    post_hooks=[check_citation_urls],
     instructions=INSTRUCTIONS,
     add_datetime_to_context=True,
     add_history_to_context=True,

@@ -24,10 +24,18 @@ This evaluation checks answer structure, scope, citation fidelity, and stated un
 ## Follow-up on the two failures
 
 - The prompt was tightened to reject invented numeric decision cutoffs and to ask for exact source URLs. Re-running **question 10** removed the 15% cutoff and kept the choice conditional on comparable site economics (HTTP 200, 10.2 seconds, no tools).
-- Re-running **question 6** left family bundles unpriced pending costing and removed the asserted 10–15% markup rule. It **still changed the Healthy Way URL** despite the stricter instruction (HTTP 200, 22.4 seconds, no tools). This remains open; the next reliability improvement is a deterministic check that every answer URL is present in the evidence pack or in a live tool result. Do not treat a prompt instruction alone as that check.
+- Re-running **question 6** left family bundles unpriced pending costing and removed the asserted 10–15% markup rule. It **still changed the Healthy Way URL** despite the stricter instruction (HTTP 200, 22.4 seconds, no tools). This showed that a prompt instruction alone was insufficient.
+
+## Citation gate follow-up
+
+An Agno post-hook now checks answer URLs against the evidence pack and URLs appearing in actual `web_search`/`web_fetch` results. A focused offline check covers pack, top-level and nested tool-result URLs, plus invented links. In a nonstreaming API run, the same price question generated an unsupported URL and the hook replaced the answer with a source-verification failure message (HTTP 200, 17.5 seconds). After removing the optional Healthy Way price anchor, the next run returned usable price bands with **no URL outside the pack** and no web call (HTTP 200, 15.0 seconds).
+
+A live JLT rent question searched and fetched sources but produced an uncited-in-results SquareYards link; the gate correctly withheld the answer (HTTP 200, 38.8 seconds, four web calls). A narrower follow-up returned one Property Finder listing URL that appeared in its web results, with rent and restaurant suitability qualified (HTTP 200, 38.2 seconds, four web calls). The gate verifies URL provenance, not whether the source supports every claim.
+
+This gate is verified for **nonstreaming** responses. [Agno's hook documentation](https://docs.agno.com/hooks/overview) says streaming chunks may be emitted before a post-hook finishes, so a streaming UI must buffer output before display if the same guarantee is required.
 
 ## Offline check and next evaluation
 
 An import check inside `agentos-api` confirmed that both city packs and all eight topic headings load into `INSTRUCTIONS`: `PASS: both city packs and all eight headings loaded`.
 
-For the next round, verify every cited URL, compare the advisor with fresh official/menu pages, test a missing-evidence question that should trigger web search, and repeat the price and city-order questions after any fix. Price bands and the opening sequence must remain hypotheses until recipe costs, lease quotes, delivery contracts, and customer tests are available.
+For the next round, compare the advisor with fresh official/menu pages and verify streaming behavior before claiming the same citation guarantee in the UI. Price bands and the opening sequence must remain hypotheses until recipe costs, lease quotes, delivery contracts, and customer tests are available.
