@@ -1,6 +1,6 @@
 # UAE Market Expansion Advisor
 
-A Python chatbot that helps a Jordanian restaurant specializing in meaty pizza and kebab sandwiches assess expansion into Dubai and Abu Dhabi. It runs on Agno and AgentOS, searches the live web through OpenAI, and cites sources from an approved list of 13 websites.
+A Python chatbot that helps a Jordanian restaurant specializing in meaty pizza and kebab sandwiches assess expansion into Dubai and Abu Dhabi. It runs on Agno and AgentOS, searches the live web through OpenAI, and uses sources from an approved list of 25 domains.
 
 The advisor covers eight areas: locations, competitors, menu, pricing, marketing, delivery platforms, licensing, and staffing. It separates sourced facts from recommendations and says when the approved sources cannot support a claim. The dated Dubai and Abu Dhabi evidence packs remain in the repository for reference; the advisor does not load them when answering.
 
@@ -46,19 +46,19 @@ After the response, point out its recommendations, inline citations, and any fac
 
 ```text
 Question → Agno market advisor → OpenAI Responses + native web_search
-         → 13-domain source filter → citation URL check → answer and saved session
+         → 25-domain source filter → citation URL check → answer and saved session
 ```
 
-The advisor is registered in [`app/main.py`](app/main.py), with its instructions and source list in [`agents/market_advisor.py`](agents/market_advisor.py). Each factual request requires native web search. The post-run citation check withholds answers that have no approved native citations or contain links that do not match those citations. AgentOS saves conversation sessions in PostgreSQL. The shared model is `gpt-6-luna`.
+The advisor is registered in [`app/main.py`](app/main.py), with its instructions and source list in [`agents/market_advisor.py`](agents/market_advisor.py). Each factual request requires native web search. The post-run check blocks off-list links; approved-domain links without an exact citation match remain visible with a warning. AgentOS saves conversation sessions in PostgreSQL. The shared model is `gpt-6-luna`.
 
 ## Design choices, costs, and limits
 
 - **Current information:** The UAE market changes quickly, so factual answers use live search rather than the dated evidence packs.
-- **Grounded sources:** Search is limited to the 13 approved domains. Other AgentOS agents and the general Agno team have separate search tools; use the market advisor directly when demonstrating this source rule.
-- **Citation check:** The advisor returns a nonstreaming answer only after checking its links against native search citations. This proves a link came from an approved search citation, not that every claim is correct.
+- **Grounded sources:** Search is limited to the 25 approved domains. Other AgentOS agents and the general Agno team have separate search tools; use the market advisor directly when demonstrating this source rule.
+- **Citation check:** Answers with off-list links are withheld. Approved-domain links that lack an exact native citation match are kept with a warning to verify the page. URL checks do not prove every claim is correct.
 - **Model and usage:** The shared runtime uses `gpt-6-luna`. Search calls are billed separately from model tokens. There is no enforced per-run token or tool-call cap, so keep demo prompts focused.
 - **Evidence gaps:** The approved sites do not establish a specific unit's rent, measured footfall, order density, the entrant's delivery commissions, or a defensible staffing count. The advisor should identify these as unknowns and recommend local validation.
-- **Evaluation status:** The original eight-topic live evaluation used `gpt-5.6`; only one of eight answers passed the first citation guard. After the prompt and URL matching fixes, menu, marketing, and licensing passed live checks. The other five topics could not be rerun because the API account had no credits. These results do not yet evaluate `gpt-6-luna`.
+- **Evaluation:** Historical results and the latest eight-topic Luna run are in [`docs/EVALUATION.md`](docs/EVALUATION.md). The latest run completed all eight topics; the report includes citation results, usage, and known limits.
 
 ## Example evaluation questions
 
