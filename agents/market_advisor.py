@@ -1,10 +1,14 @@
 """Source-grounded restaurant expansion advisor for Dubai and Abu Dhabi."""
 
 import re
+from typing import Any, Dict, Tuple
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from agno.agent import Agent
 from agno.models.openai import OpenAIResponses
+from agno.models.message import Message
+from agno.models.response import ModelResponse
+from openai.types.responses import ResponseStreamEvent
 from agno.run.agent import RunOutput
 
 from db import get_postgres_db
@@ -115,6 +119,20 @@ def check_citation_urls(run_output: RunOutput) -> None:
             "native citation metadata. Verify those pages before relying on related claims."
         )
 
+
+class AdvisorOpenAIResponses(OpenAIResponses):
+    """Keep provider citation objects from breaking Agno's SSE serialization."""
+
+    def _parse_provider_response_delta(
+        self, stream_event: ResponseStreamEvent, assistant_message: Message, tool_use: Dict[str, Any]
+    ) -> Tuple[ModelResponse, Dict[str, Any]]:
+        """Retain normalized URLs while dropping raw SDK models with deferred serializers."""
+        response, tool_use = super()._parse_provider_response_delta(stream_event, assistant_message, tool_use)
+        if response.citations is not None:
+            response.citations.raw = None
+        return response, tool_use
+
+
 INSTRUCTIONS = f"""\
 You advise executives of restaurants of any cuisine or service model evaluating expansion into Dubai and Abu Dhabi.
 Use the user's context to identify the restaurant concept. If its cuisine, service model, target customer, or price
@@ -147,7 +165,7 @@ cover exactly these eight topics:
 market_advisor = Agent(
     id="market-advisor",
     name="UAE Market Advisor",
-    model=OpenAIResponses(id="gpt-6-luna", reasoning_effort="low"),
+    model=AdvisorOpenAIResponses(id="gpt-6-luna", reasoning_effort="low"),
     db=get_postgres_db(),
     tools=[{"type": "web_search", "filters": {"allowed_domains": list(ALLOWED_SEARCH_DOMAINS)}}],
     tool_choice="required",
