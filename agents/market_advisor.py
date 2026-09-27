@@ -4,9 +4,9 @@ import re
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from agno.agent import Agent
+from agno.models.openai import OpenAIResponses
 from agno.run.agent import RunOutput
 
-from app.settings import default_model
 from db import get_postgres_db
 
 URL_PATTERN = re.compile(r"https?://[^\s<>\"'`]+")
@@ -144,7 +144,7 @@ cover exactly these eight topics:
 market_advisor = Agent(
     id="market-advisor",
     name="UAE Market Advisor",
-    model=default_model(),
+    model=OpenAIResponses(id="gpt-6-luna", reasoning_effort="low"),
     db=get_postgres_db(),
     tools=[{"type": "web_search", "filters": {"allowed_domains": list(ALLOWED_SEARCH_DOMAINS)}}],
     tool_choice="required",

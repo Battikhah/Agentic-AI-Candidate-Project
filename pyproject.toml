@@ -1,19 +1,16 @@
 [project]
-name = "agentos-docker"
+name = "uae-market-advisor"
 version = "1.0.0"
-description = "AgentOS: a production runtime for agents. Self-hosted Docker sibling of the agentos template family."
+description = "Live, source-grounded expansion advice for a Jordanian restaurant entering the UAE."
 requires-python = ">=3.14,<4"
 readme = "README.md"
 license-files = ["LICENSE"]
 authors = [{ name = "Agno", email = "hello@agno.com" }]
 
 dependencies = [
-  "agno[os,mcp,slack,pgvector,psycopg,csv,excel,docx,pdf,website]==3.0.4",
-  "cel-python",
+  "agno[os,psycopg]==3.0.4",
   "openai",
-  "parallel-web",
   "python-dotenv",
-  "reportlab",
 ]
 
 [project.optional-dependencies]
@@ -24,7 +21,7 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-include = ["agents*", "app*", "db*", "evals*", "teams*", "workflows*"]
+include = ["agents*", "app*", "db*"]
 namespaces = false
 
 [tool.ruff]
@@ -42,5 +39,4 @@ check_untyped_defs = true
 no_implicit_optional = true
 warn_unused_configs = true
 plugins = ["pydantic.mypy"]
-# tmp/ is untracked scratch space — never part of the validated tree.
 exclude = [".venv*", "tmp"]

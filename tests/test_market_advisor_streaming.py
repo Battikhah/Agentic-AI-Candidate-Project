@@ -23,10 +23,6 @@ class MarketAdvisorStreamingGuardTest(unittest.TestCase):
             form = await request.form()
             return {"message": form.get("message")}
 
-        @self.app.post("/agents/other-agent/runs")
-        async def other_agent():
-            return {"ok": True}
-
         self.client = TestClient(self.app)
 
     def test_missing_or_true_stream_is_rejected_but_false_preserves_body(self) -> None:
@@ -60,12 +56,6 @@ class MarketAdvisorStreamingGuardTest(unittest.TestCase):
         )
         self.assertEqual(response.status_code, 413)
         self.assertEqual(self.advisor_calls, 0)
-
-    def test_other_agent_stream_request_is_unchanged(self) -> None:
-        response = self.client.post("/agents/other-agent/runs", data={"stream": "true"})
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), {"ok": True})
-
 
 if __name__ == "__main__":
     unittest.main()

@@ -2,7 +2,7 @@
 
 ############################################################################
 #
-#    Agno Workspace Validator
+#    Market Advisor Validator
 #
 #    Usage: ./scripts/validate.sh
 #
@@ -31,7 +31,7 @@ failed=0
 
 echo -e "${DIM}> ruff format --check ${REPO_ROOT}${NC}"
 if ! ruff format --check "${REPO_ROOT}"; then
-  echo -e "${RED}Fix with:${NC} ${BOLD}./scripts/format.sh${NC}"
+  echo -e "${RED}Format with:${NC} ${BOLD}ruff format ${REPO_ROOT}${NC}"
   failed=1
 fi
 
