@@ -1,6 +1,6 @@
 # UAE Market Advisor
 
-This repository contains one product: a live, source-grounded advisor for a Jordanian restaurant assessing Dubai and Abu Dhabi.
+This repository contains one product: a live, source-grounded advisor for restaurants assessing expansion into Dubai and Abu Dhabi.
 
 - The agent prompt, approved domains, and citation checks are in `agents/market_advisor.py`.
 - AgentOS registration and the non-streaming request guard are in `app/main.py`.

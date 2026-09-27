@@ -1,7 +1,7 @@
 [project]
 name = "uae-market-advisor"
 version = "1.0.0"
-description = "Live, source-grounded expansion advice for a Jordanian restaurant entering the UAE."
+description = "Live, source-grounded UAE expansion advice for restaurants."
 requires-python = ">=3.14,<4"
 readme = "README.md"
 license-files = ["LICENSE"]

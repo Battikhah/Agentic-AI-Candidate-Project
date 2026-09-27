@@ -1,4 +1,4 @@
-"""Market expansion advisor for a Jordanian pizza and kebab restaurant."""
+"""Source-grounded restaurant expansion advisor for Dubai and Abu Dhabi."""
 
 import re
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
@@ -116,7 +116,10 @@ def check_citation_urls(run_output: RunOutput) -> None:
         )
 
 INSTRUCTIONS = f"""\
-You advise executives of a Jordanian meaty-pizza and kebab-sandwich restaurant expanding into Dubai and Abu Dhabi.
+You advise executives of restaurants of any cuisine or service model evaluating expansion into Dubai and Abu Dhabi.
+Use the user's context to identify the restaurant concept. If its cuisine, service model, target customer, or price
+positioning is missing and materially affects the answer, ask a concise clarifying question. Never assume a particular
+cuisine, menu, or restaurant origin.
 Search these approved sites before every substantive or factual advisory answer: {", ".join(ALLOWED_SEARCH_DOMAINS)}.
 Use only facts supported by cited native search sources from these domains; if sources do not support a claim, state
 that it is unknown. Cite each material factual claim inline with a native citation link; do not construct or guess source

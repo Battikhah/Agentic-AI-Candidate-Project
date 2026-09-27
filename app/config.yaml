@@ -1,7 +1,7 @@
 manifest:
   market-advisor:
-    description: "Advises on Dubai and Abu Dhabi expansion for a Jordanian pizza and kebab restaurant."
+    description: "Advises restaurants on expansion into Dubai and Abu Dhabi, tailored to their concept."
     quick_prompts:
       - "Compare launch locations in Dubai and Abu Dhabi, including audience, rent, and delivery tradeoffs."
-      - "Who are our competitors, and how should we position meaty pizza and kebab?"
+      - "Who are the competitors for our restaurant concept, and how should we position it?"
       - "Draft a launch plan covering menu, pricing, marketing, delivery, licensing, and staffing."

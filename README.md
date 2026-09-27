@@ -1,6 +1,6 @@
 # UAE Market Advisor
 
-A live web research advisor for a Jordanian restaurant known for meaty pizza and kebab sandwiches, considering expansion to Dubai and Abu Dhabi. It covers eight areas: location, competitors, menu, pricing, marketing, delivery platforms, licensing, and staffing.
+A live web research advisor for restaurant executives assessing expansion into Dubai and Abu Dhabi. It adapts its analysis to the restaurant concept provided and covers location, competitors, menu, pricing, marketing, delivery platforms, licensing, and staffing.
 
 The advisor uses OpenAI's native web search, restricted to 25 approved domains. It separates sourced facts from recommendations, flags uncertainty, and checks links before returning an answer. Approved-domain links without a matching native citation stay visible with a warning; links outside the approved domains are withheld. It searches live for factual answers and does not use stored evidence packs.
 
@@ -24,7 +24,7 @@ docker exec -e AGNO_DEBUG=False -it agentos-api python -c 'import asyncio; from 
 
 Try this prompt:
 
-> We are a Jordanian restaurant known for meaty pizza and kebab sandwiches. Compare a first branch in Dubai with one in Abu Dhabi. Cover location, competitors, menu, AED price range, marketing, delivery platforms, licensing, and staffing. Give concise recommendations and tradeoffs, cite current approved sources inline, and say when rent, footfall, commissions, or staffing figures are not verified.
+> We are planning to expand our [restaurant concept and cuisine] into the UAE. Compare Dubai and Abu Dhabi for our concept. Cover location, competitors, menu, AED price range, marketing, delivery platforms, licensing, and staffing. Give concise recommendations and tradeoffs, cite current approved sources inline, and say when rent, footfall, commissions, or staffing figures are not verified.
 
 For direct API requests, submit `stream=false`. The citation check runs after the model completes, so the advisor endpoint rejects streaming requests.
 

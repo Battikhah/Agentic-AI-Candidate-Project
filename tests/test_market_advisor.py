@@ -5,7 +5,16 @@ from types import SimpleNamespace
 
 from agno.run.agent import RunOutput
 
-from agents.market_advisor import check_citation_urls
+from agents.market_advisor import INSTRUCTIONS, check_citation_urls
+
+
+class AdvisorInstructionsTest(unittest.TestCase):
+    """Keep the advisor useful across restaurant concepts."""
+
+    def test_instructions_support_any_restaurant_concept(self) -> None:
+        self.assertIn("restaurant concept", INSTRUCTIONS.lower())
+        self.assertIn("ask", INSTRUCTIONS.lower())
+        self.assertNotRegex(INSTRUCTIONS.lower(), r"jordanian|meaty.?pizza|kebab")
 
 
 class CitationUrlTest(unittest.TestCase):
