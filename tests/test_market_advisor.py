@@ -11,13 +11,15 @@ from agents.market_advisor import check_citation_urls
 class CitationUrlTest(unittest.TestCase):
     """Cover native citations, historical pack links, and invented URLs."""
 
-    def test_evidence_pack_url_without_native_citation_is_rejected(self) -> None:
+    def test_approved_domain_url_without_native_citation_is_kept_with_warning(self) -> None:
         historical_pack_url = "https://www.visitdubai.com/en/things-to-do/itineraries/jlt-foodie-trail"
         answer = RunOutput(content=f"[Source]({historical_pack_url})")
 
         check_citation_urls(answer)
 
-        self.assertIn("could not verify", answer.content)
+        self.assertIn(historical_pack_url, answer.content)
+        self.assertIn("native citation", answer.content)
+        self.assertIn("verify", answer.content.lower())
 
     def test_factual_answer_without_native_citations_is_rejected(self) -> None:
         answer = RunOutput(content="JLT rents are currently AED 200,000 per year.")
@@ -94,10 +96,20 @@ class CitationUrlTest(unittest.TestCase):
 
         self.assertEqual(answer.content, f"[Dubai rule]({answer_url})")
 
-    def test_unmatched_url_is_rejected_even_on_an_approved_domain(self) -> None:
+    def test_unmatched_url_on_an_approved_domain_is_kept_with_warning(self) -> None:
         citations = SimpleNamespace(urls=[SimpleNamespace(url="https://talabat.com/uae/restaurant/current-menu")])
         unrelated_url = "https://talabat.com/uae/restaurant/another-menu"
         answer = RunOutput(content=f"[Other menu]({unrelated_url})", citations=citations)
+
+        check_citation_urls(answer)
+
+        self.assertIn(unrelated_url, answer.content)
+        self.assertIn("native citation", answer.content)
+        self.assertIn("verify", answer.content.lower())
+
+    def test_answer_link_outside_approved_domains_is_rejected(self) -> None:
+        citations = SimpleNamespace(urls=[SimpleNamespace(url="https://talabat.com/uae/restaurant/current-menu")])
+        answer = RunOutput(content="[Source](https://example.invalid/menu)", citations=citations)
 
         check_citation_urls(answer)
 

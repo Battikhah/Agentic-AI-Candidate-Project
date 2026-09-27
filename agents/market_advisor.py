@@ -77,7 +77,7 @@ def _extract_urls(text: str) -> list[str]:
 
 
 def check_citation_urls(run_output: RunOutput) -> None:
-    """Allow answer links only when native search cited them from an approved domain."""
+    """Keep approved-domain links and warn when native citations do not match."""
     if not isinstance(run_output.content, str):
         return
 
@@ -94,17 +94,25 @@ def check_citation_urls(run_output: RunOutput) -> None:
         if url:
             allowed.add(_citation_key(url))
 
-    if not allowed:
+    answer_urls = _extract_urls(run_output.content)
+    if any(not is_allowed_search_url(url) for url in answer_urls):
+        run_output.content = (
+            "I could not verify every source link in this answer. "
+            "Please retry or ask me to search for current sources."
+        )
+        return
+
+    if not allowed and not answer_urls:
         run_output.content = (
             "I could not verify this answer against approved current sources. "
             "Please retry or ask me to search for current sources."
         )
         return
 
-    if {_citation_key(url) for url in _extract_urls(run_output.content)} - allowed:
-        run_output.content = (
-            "I could not verify every source link in this answer. "
-            "Please retry or ask me to search for current sources."
+    if {_citation_key(url) for url in answer_urls} - allowed:
+        run_output.content += (
+            "\n\n**Source check:** Some links are on approved domains but do not match "
+            "native citation metadata. Verify those pages before relying on related claims."
         )
 
 INSTRUCTIONS = f"""\
