@@ -24,6 +24,18 @@ ALLOWED_SEARCH_DOMAINS = (
     "careem.com",
     "dm.gov.ae",
     "visitdubai.com",
+    "dubailand.gov.ae",
+    "propertyfinder.ae",
+    "bayut.com",
+    "dsc.gov.ae",
+    "rta.ae",
+    "scad.gov.ae",
+    "emaar.com",
+    "aldar.com",
+    "majidalfuttaim.com",
+    "deliveroo.ae",
+    "noon.com",
+    "mohre.gov.ae",
 )
 
 

@@ -10,4 +10,7 @@ from agno.models.openai import OpenAIResponses
 
 def default_model() -> OpenAIResponses:
     """Fresh model instance per agent — avoids shared-state footguns."""
-    return OpenAIResponses(id="gpt-6-luna")
+    return OpenAIResponses(
+        id="gpt-6-luna",
+        reasoning_effort="low",
+    )
