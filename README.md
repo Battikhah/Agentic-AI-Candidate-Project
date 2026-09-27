@@ -1,51 +1,83 @@
-## AgentOS: Serve agents over API, MCP, and interfaces like Slack
+# UAE Market Expansion Advisor
 
-AgentOS is a durable agent runtime that serves agents over API, MCP, and chat interfaces like Slack. Build customer-facing agents and serve them to your users from your product, through AI apps like Claude and ChatGPT, or interfaces like Slack. AgentOS gives you one agent backend for every frontend.
+A Python chatbot that helps a Jordanian restaurant specializing in meaty pizza and kebab sandwiches assess expansion into Dubai and Abu Dhabi. It runs on Agno and AgentOS, searches the live web through OpenAI, and cites sources from an approved list of 13 websites.
 
-**Three ways to build agents.**
+The advisor covers eight areas: locations, competitors, menu, pricing, marketing, delivery platforms, licensing, and staffing. It separates sourced facts from recommendations and says when the approved sources cannot support a claim. The dated Dubai and Abu Dhabi evidence packs remain in the repository for reference; the advisor does not load them when answering.
 
-1. **Coding agent.** Point a coding agent at the skills in [`.agents/skills/`](.agents/skills/) and it can create, improve and evaluate your agents for you.
-2. **Natural language.** Ask the built-in Platform Builder to build agents for you.
-3. **No-code Studio.** Build agents visually using the [AgentOS Studio](https://os.agno.com?utm_source=github&utm_medium=template&utm_campaign=agentos-docker).
+## Run the demo
 
-**Three ways to serve your agents to your users.**
+You need Docker Desktop and an OpenAI API key with available API credits. If `.env` does not exist, copy `example.env` to `.env`, then add your key as `OPENAI_API_KEY`. Keep the key private and out of Git.
 
-1. **Your product.** Call the AgentOS REST API from your product.
-2. **AI apps.** Connect your agents to Claude and ChatGPT using the AgentOS MCP server.
-3. **Chat interfaces.** Distribute your agents through Slack, WhatsApp (and more) using AgentOS Interfaces.
-
-**Monitor and govern your agents.**
-
-The [AgentOS Control Plane](https://os.agno.com?utm_source=github&utm_medium=template&utm_campaign=agentos-docker) gives you a unified view of your agent platform. Trace every action. Enforce agent- and tool-level permissions.
-
-<img width="3298" height="2412" alt="AgentOS" src="https://github.com/user-attachments/assets/40a53a42-d4d2-402b-8e92-742609207957" />
-
-<p align="center"><em>Everything runs on infrastructure you control, your data lives in your database.</em></p>
-
-## Run the UAE Market Advisor
-
-From this repository's root, with [Docker](https://www.docker.com/get-started/) running:
+From the repository root, start the platform:
 
 ```sh
-cp example.env .env
-# Set OPENAI_API_KEY in .env; do not commit it.
 docker compose up -d --build
+```
+
+Open [http://localhost:8000/docs](http://localhost:8000/docs) and confirm the API is available. The running services are the AgentOS API and PostgreSQL database.
+
+### Connect os.agno.com
+
+1. Sign in at [os.agno.com](https://os.agno.com).
+2. Choose **Connect OS** and select **Local**.
+3. Set the endpoint to `http://localhost:8000` and name it `Local AgentOS`.
+4. In Chrome, allow local network access if it asks. The OS should appear as **Active**.
+5. Open **Sessions** or **Traces** to review saved runs.
+
+The AgentOS Control Plane connects from your browser directly to the local runtime. This project requires `stream=false` for direct advisor requests so the citation check can finish before the answer is returned. Use the Docker CLI below to run the advisor; the UI is useful for showing the connected OS and inspecting saved activity.
+
+### Ask the advisor
+
+In a second terminal, run:
+
+```sh
 docker exec -e AGNO_DEBUG=False -it agentos-api python -c 'import asyncio; from agents.market_advisor import market_advisor; asyncio.run(market_advisor.acli_app())'
 ```
 
-The last command opens Agno's interactive CLI chat; enter `exit` to leave. It was checked with both an evidence-pack question and a live web-search question. AgentOS also exposes the advisor at `POST /agents/market-advisor/runs`, documented at [http://localhost:8000/docs](http://localhost:8000/docs). The hosted [AgentOS UI](https://os.agno.com) is optional; its local connection was inactive in the verification environment, so use the CLI for a reproducible run.
+Paste this executive question into the CLI:
 
-Try these executive questions:
+> We are a Jordanian restaurant known for meaty pizza and kebab sandwiches. Compare a first branch in Dubai with one in Abu Dhabi. Cover location, competitors, menu, AED price range, marketing, delivery platforms, licensing, and staffing. Give concise recommendations and tradeoffs, cite current approved sources inline, and say when rent, footfall, commissions, or staffing figures are not verified.
 
-- Compare Dubai and Abu Dhabi launch areas, including audience, rent, and delivery tradeoffs.
-- Identify competitors in both cities and suggest positioning for meaty pizza and kebab.
-- Draft a launch plan covering menu, pricing, marketing, delivery, licensing, and staffing.
+After the response, point out its recommendations, inline citations, and any facts it marks as unknown. In os.agno.com, refresh **Sessions** or **Traces** to show the saved run. Type `exit` in the CLI when finished.
 
-The Python/Agno agent is registered in [`app/main.py`](app/main.py) and described in [`app/config.yaml`](app/config.yaml). It reads the dated [Dubai](evidence/dubai.md) and [Abu Dhabi](evidence/abu_dhabi.md) evidence packs first, then can use Parallel web search for missing or current-sensitive facts. A post-hook checks whether each answer URL appeared in the pack or a web-tool result before a nonstreaming answer is returned. AgentOS stores sessions in Postgres. The agent uses the shared GPT-5.6 model; instructions favor the pack and a few targeted searches to control API use. [The ten-question evaluation](docs/EVALUATION.md) records actual token usage and failures. There is no enforced token or tool-call cap.
+> **Recording:** The assessment asks for a 1–3 minute video showing the system running, an executive question, and a structured answer. Start recording shortly before you submit the prompt. Keep the question and answer visible, then show the saved session or trace in os.agno.com.
 
-Evidence can become stale, web results can be misread, and URL membership does not prove that a claim is supported. Verify current rents, prices, rules, and competitors locally; uncosted prices remain provisional. The URL gate is verified for nonstreaming answers, including the CLI; streamed UI chunks may arrive before the post-hook runs.
+## How it works
 
-**AI tool disclosure:** Codex assisted with the advisor code, evidence research, evaluation, and this documentation; GPT-6 Luna Medium subagents drafted and reviewed the documentation and demo scope. The deployed Agno advisor runs on GPT-5.6. The candidate set up the Agno Docker platform. Personal code contributions and which parts the candidate can explain must be confirmed before submission.
+```text
+Question → Agno market advisor → OpenAI Responses + native web_search
+         → 13-domain source filter → citation URL check → answer and saved session
+```
+
+The advisor is registered in [`app/main.py`](app/main.py), with its instructions and source list in [`agents/market_advisor.py`](agents/market_advisor.py). Each factual request requires native web search. The post-run citation check withholds answers that have no approved native citations or contain links that do not match those citations. AgentOS saves conversation sessions in PostgreSQL. The shared model is `gpt-6-luna`.
+
+## Design choices, costs, and limits
+
+- **Current information:** The UAE market changes quickly, so factual answers use live search rather than the dated evidence packs.
+- **Grounded sources:** Search is limited to the 13 approved domains. Other AgentOS agents and the general Agno team have separate search tools; use the market advisor directly when demonstrating this source rule.
+- **Citation check:** The advisor returns a nonstreaming answer only after checking its links against native search citations. This proves a link came from an approved search citation, not that every claim is correct.
+- **Model and usage:** The shared runtime uses `gpt-6-luna`. Search calls are billed separately from model tokens. There is no enforced per-run token or tool-call cap, so keep demo prompts focused.
+- **Evidence gaps:** The approved sites do not establish a specific unit's rent, measured footfall, order density, the entrant's delivery commissions, or a defensible staffing count. The advisor should identify these as unknowns and recommend local validation.
+- **Evaluation status:** The original eight-topic live evaluation used `gpt-5.6`; only one of eight answers passed the first citation guard. After the prompt and URL matching fixes, menu, marketing, and licensing passed live checks. The other five topics could not be rerun because the API account had no credits. These results do not yet evaluate `gpt-6-luna`.
+
+## Example evaluation questions
+
+The evaluation covered these eight executive questions, one for each advisory area:
+
+1. Which Dubai areas should we shortlist, and what evidence is available on audience fit, rent, and delivery reach?
+2. Who are the relevant pizza and kebab competitors in Abu Dhabi, and where can we differentiate?
+3. What starter menu and localization choices fit a Dubai launch?
+4. What AED price bands are visible for competitors in Abu Dhabi, and how should we position our prices?
+5. Which marketing channels and partnership options have current evidence in Dubai and Abu Dhabi?
+6. Which delivery platforms show restaurant coverage, and what commercial terms still need checking?
+7. Which official approvals should a new Dubai restaurant verify before opening?
+8. What staffing roles and operating coverage should a small Abu Dhabi restaurant plan for?
+
+The main issue found was citation mismatch: early answers sometimes included links that were not present in native citation metadata, so the guard withheld them. The fixes improved URL matching and told the model to cite inline instead of adding a separate URL list. Quality still needs human review, especially for legal claims and recommendations based on small samples.
+
+## AI tool disclosure
+
+Codex and GPT-6 Luna coding agents assisted with research, implementation, debugging, evaluation, and documentation. I set the project direction and requirements, chose the advisory topics and source rules, defined how unsupported claims should be handled, set the evaluation goals, reviewed outputs, and made the final implementation decisions. I also set up and ran the Agno Docker platform and prepared the demonstration. I understand the resulting project and can explain its architecture, behavior, and limitations.
 
 ## Make the platform yours
 
